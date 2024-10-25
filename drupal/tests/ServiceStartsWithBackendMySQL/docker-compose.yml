@@ -1,0 +1,16 @@
+# file: docker-compose.yml
+#
+# Tests that we can bring up the demo site.
+#
+# `base/rootfs/etc/cont-init.d/00-container-environment-00-init.sh`
+
+name: drupal-servicestartswithbackendmysql
+services:
+  drupal:
+    image: ${DRUPAL:-islandora/drupal:local}
+    volumes:
+      - ./test.sh:/test.sh # Test to run.
+    command:
+      - /test.sh # Run test and exit.
+  mariadb:
+    image: ${MARIADB:-islandora/mariadb:local}

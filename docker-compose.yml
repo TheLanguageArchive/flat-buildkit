@@ -1,0 +1,32 @@
+services:
+  drupal:
+    privileged: true
+    user: root
+    volumes:
+      - ./drupal_modules:/var/www/html/modules
+      - ./drupal_profiles:/var/www/html/profiles
+      - ./drupal_themes:/var/www/html/themes
+      - drupal_sites:/var/www/html/sites
+    build:
+      context: ./drupal
+      dockerfile: Dockerfile
+    ports:
+      - 80:80
+  postgres:
+    build:
+      context: ./postgresql
+      dockerfile: Dockerfile
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
+  fcrepo:
+    build:
+      context: ./fcrepo
+      dockerfile: Dockerfile
+    ports:
+      - 8080:8080
+
+volumes:
+  drupal_sites:
+  db_data:
