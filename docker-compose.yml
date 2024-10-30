@@ -1,4 +1,43 @@
 services:
+  postgres:
+    build:
+      context: ./postgresql
+      dockerfile: Dockerfile
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=fedora
+  graphdb:
+    build:
+      context: ./graphdb
+      dockerfile: Dockerfile
+    volumes:
+      - graphdb-data:/data
+    ports:
+      - 7200:7200
+  # activemq is already part of fcrepo?
+  # activemq:
+  #   build:
+  #     context: ./activemq
+  #     dockerfile: Dockerfile
+  #   ports:
+  #     - 8161:8161
+  #     - 61616:61616
+  fcrepo:
+    build:
+      context: ./fcrepo
+      dockerfile: Dockerfile
+    ports:
+      - 8080:8080
+    environment:
+      CATALINA_OPTS: "-Dfcrepo.jms.baseUrl=http://fcrepo:6161"
+    volumes:
+      - fcrepo-data:/data
+      - ./fcrepo-config:/opt/fcrepo/config
+      - archive-data:/mnt/vfs1/archive/archive-data
   drupal:
     privileged: true
     user: root
@@ -12,21 +51,47 @@ services:
       dockerfile: Dockerfile
     ports:
       - 80:80
-  postgres:
+  solr:
     build:
-      context: ./postgresql
+      context: ./solr
       dockerfile: Dockerfile
+    ports:
+      - 8983:8983
     volumes:
-      - db_data:/var/lib/postgresql/data
+      - solr-data:/data:rw
+      - type: volume
+        source: drupal-solr-config
+        target: /opt/solr/server/solr/default
+        volume:
+          nocopy: true
+  fits:
+    image: islandora/fits:3.4.2
     ports:
-      - 5432:5432
-  fcrepo:
+      - 8081:8080
+    volumes:
+      - archive-data:/mnt/vfs1/archive/archive-data
+  cantaloupe:
+    image: islandora/cantaloupe:3.4
+    ports:
+      - 8182:8182
+    volumes:
+      - archive-data:/mnt/vfs1/archive/archive-data
+      - cantaloupe-data:/data:rw
+  portainer:
     build:
-      context: ./fcrepo
+      context: ./portainer
       dockerfile: Dockerfile
     ports:
-      - 8080:8080
-
+      - 9443:9443
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./portainer_data:/data
 volumes:
   drupal_sites:
   db_data:
+  graphdb-data:
+  drupal-solr-config:
+  solr-data:
+  archive-data:
+  cantaloupe-data:
+  fcrepo-data:

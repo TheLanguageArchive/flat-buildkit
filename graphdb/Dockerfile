@@ -1,0 +1,5 @@
+FROM ontotext/graphdb:10.7.6
+
+ENV GDB_HEAP_SIZE=5g
+ENV GDB_MIN_MEM=1g
+ENV GDB_MAX_MEM=6g
