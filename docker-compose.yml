@@ -39,8 +39,6 @@ services:
       - ./fcrepo-config:/opt/fcrepo/config
       - archive-data:/mnt/vfs1/archive/archive-data
   drupal:
-    privileged: true
-    user: root
     volumes:
       - ./drupal_modules:/var/www/html/modules
       - ./drupal_profiles:/var/www/html/profiles

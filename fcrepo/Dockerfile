@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1.5.1
-FROM tomcat:10.1.13-jdk21-openjdk-slim
+FROM tomcat:9.0.96-jre21
 
 ARG TARGETARCH
 ARG FCREPO_VERSION=6.5.0
@@ -25,12 +25,12 @@ RUN --mount=type=bind,source=rootfs/usr/local/bin/download.sh,target=/usr/local/
     download.sh \
     --url ${FCREPO_URL} \
     --sha256 ${FCREPO_SHA256} \
-    --dest /opt/tomcat/webapps/fcrepo \
+    --dest /usr/local/tomcat/webapps/fcrepo \
     && \
     download.sh \
     --url ${SYN_URL} \
     --sha256 ${SYN_SHA256} \
-    --dest /opt/tomcat/lib
+    --dest /usr/local/tomcat/lib
 #&& \
 #cleanup.sh
 
