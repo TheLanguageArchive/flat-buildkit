@@ -38,17 +38,37 @@ services:
       - fcrepo-data:/data
       - ./fcrepo-config:/opt/fcrepo/config
       - archive-data:/mnt/vfs1/archive/archive-data
-  drupal:
+  php:
+    image: php:8.3-fpm
+    container_name: php-fpm
     volumes:
-      - ./drupal_modules:/var/www/html/modules
-      - ./drupal_profiles:/var/www/html/profiles
-      - ./drupal_themes:/var/www/html/themes
-      - drupal_sites:/var/www/html/sites
+      - ./drupal-content:/var/www/html
+  drupal:
+    environment:
+      - POSTGRES_PASSWORD=fedora
+      - DRUPAL_DB_HOST=postgres
+      - DRUPAL_DB_NAME=drupal
+      - DRUPAL_DB_USER=drupal
+      - DRUPAL_DB_PASSWORD=drupalpassword
+      - DRUPAL_DB_DRIVER=pgsql
+    volumes:
+      - ./drupal-content:/var/www/html
     build:
       context: ./drupal
       dockerfile: Dockerfile
+    depends_on:
+      - postgres
+      - php
+  nginx:
+    image: nginx:latest
+    container_name: nginx
     ports:
-      - 80:80
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./drupal-content:/var/www/html
+    depends_on:
+      - php
   solr:
     build:
       context: ./solr
