@@ -22,16 +22,23 @@ PGPASSWORD="$POSTGRES_PASSWORD" psql -h "$DRUPAL_DB_HOST" -U "postgres" -d "$DRU
 # Set bytea_output to 'escape' for Drupal compatibility
 PGPASSWORD="$POSTGRES_PASSWORD" psql -h "$DRUPAL_DB_HOST" -U "postgres" -d "$DRUPAL_DB_NAME" -c "ALTER DATABASE \"$DRUPAL_DB_NAME\" SET bytea_output = 'escape'"
 
+# If composer.json does not exist, download Drupal with Composer
+if [ ! -f /var/www/html/composer.json ]; then
+  echo "Installing Drupal with Composer..."
+  composer create-project drupal/recommended-project /var/www/html
+  chown -R www-data:www-data /var/www/html
+fi
+
 # Install Drush
 composer require --dev drush/drush
 
 # Install Drupal with Composer if not already installed
 if [ ! -f /var/www/html/web/sites/default/settings.php ]; then
+  echo "Installing Drupal with Composer..."
+  composer create-project drupal/recommended-project /opt/drupal
 
   # Navigate to the Drupal project directory
-  cd /var/www/html
-
-  composer install
+  cd /opt/drupal
 
   # Run the installation using Drush
   drush si standard \
@@ -40,4 +47,9 @@ if [ ! -f /var/www/html/web/sites/default/settings.php ]; then
     --account-name=admin \
     --account-pass=islandora \
     --yes
+else
+  echo "Drupal is already installed."
 fi
+
+# Start PHP-FPM
+php-fpm
