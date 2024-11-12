@@ -29,25 +29,30 @@ if [ ! -f /var/www/html/composer.json ]; then
   chown -R www-data:www-data /var/www/html/web
 fi
 
+
+cd /var/www/html/
+
 # Install Drush
 composer require --dev drush/drush
 
+composer install
+
 # Install Drupal site if not already installed
-if [ ! -f /var/www/html/web/sites/default/settings.php ]; then
+#if [ ! -f /var/www/html/web/sites/default/settings.php ]; then
 
   # Navigate to the Drupal project directory
   cd /var/www/html/web
 
   # Run the installation using Drush
-  drush si standard \
+  /var/www/html/vendor/drush/drush/drush si standard \
     --db-url="pgsql://${DRUPAL_DB_USER}:${DRUPAL_DB_PASSWORD}@${DRUPAL_DB_HOST}/${DRUPAL_DB_NAME}" \
     --site-name="The Language Archive" \
     --account-name=admin \
     --account-pass=islandora \
     --yes
-else
-  echo "Drupal is already installed."
-fi
+#else
+#  echo "Drupal is already installed."
+#fi
 
 # Start PHP-FPM
 php-fpm

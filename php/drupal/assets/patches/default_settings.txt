@@ -10,7 +10,7 @@ if (PHP_SAPI === 'cli') {
 // Required when running Drupal behind a reverse proxy.
 $settings['reverse_proxy'] = TRUE;
 $settings['reverse_proxy_addresses'] = array($_SERVER['REMOTE_ADDR']);
-$settings['reverse_proxy_trusted_headers'] = \Symfony\Component\HttpFoundation\Request::HEADER_X_FORWARDED_FOR | 
+$settings['reverse_proxy_trusted_headers'] = \Symfony\Component\HttpFoundation\Request::HEADER_X_FORWARDED_FOR |
 \Symfony\Component\HttpFoundation\Request::HEADER_X_FORWARDED_PROTO | \Symfony\Component\HttpFoundation\Request::HEADER_X_FORWARDED_PORT;
 
 /**
@@ -35,43 +35,50 @@ $settings['config_sync_directory'] = '/var/www/drupal/config/sync';
 global $content_directories;
 $content_directories['sync'] = '/var/www/drupal/content/sync';
 
-// Container environment variable path.
-$path = "/var/run/s6/container_environment/";
+// Get all environment variables
+$envVariables = getenv();
+
+// Define constants for each environment variable
+foreach ($envVariables as $key => $value) {
+    // Use a prefix to avoid conflicts with existing constants (optional)
+    define(strtoupper($key), $value);
+}
 
 // Some configurations are derived from environment variables.
-$config['islandora.settings']['broker_url'] = file_get_contents($path . 'DRUPAL_DEFAULT_BROKER_URL');
-$config['islandora.settings']['broker_user'] = file_exists($path . 'DRUPAL_DEFAULT_BROKER_USER') ? file_get_contents($path . 'DRUPAL_DEFAULT_BROKER_USER') : NULL;
-$config['islandora.settings']['broker_password'] = file_exists($path . 'DRUPAL_DEFAULT_BROKER_PASSWORD') ? file_get_contents($path . 'DRUPAL_DEFAULT_BROKER_PASSWORD') : NULL;
-$config['islandora_iiif.settings']['iiif_server'] = file_get_contents($path . 'DRUPAL_DEFAULT_CANTALOUPE_URL');
-$config['openseadragon.settings']['iiif_server'] = file_get_contents($path . 'DRUPAL_DEFAULT_CANTALOUPE_URL');
-$config['search_api.server.default_solr_server']['backend_config']['connector_config']['host'] = file_get_contents($path . 'DRUPAL_DEFAULT_SOLR_HOST');
-$config['search_api.server.default_solr_server']['backend_config']['connector_config']['port'] = file_get_contents($path . 'DRUPAL_DEFAULT_SOLR_PORT');
-$config['search_api.server.default_solr_server']['backend_config']['connector_config']['core'] = file_get_contents($path . 'DRUPAL_DEFAULT_SOLR_CORE');
+$config['islandora.settings']['broker_url'] = DRUPAL_DEFAULT_BROKER_URL;
+$config['islandora.settings']['broker_user'] = DRUPAL_DEFAULT_BROKER_USER;
+$config['islandora.settings']['broker_password'] = DRUPAL_DEFAULT_BROKER_PASSWORD;
+$config['islandora_iiif.settings']['iiif_server'] = DRUPAL_DEFAULT_CANTALOUPE_URL;
+$config['openseadragon.settings']['iiif_server'] = DRUPAL_DEFAULT_CANTALOUPE_URL;
+$config['search_api.server.default_solr_server']['backend_config']['connector_config']['host'] = DRUPAL_DEFAULT_SOLR_HOST;
+$config['search_api.server.default_solr_server']['backend_config']['connector_config']['port'] = DRUPAL_DEFAULT_SOLR_PORT;
+$config['search_api.server.default_solr_server']['backend_config']['connector_config']['core'] = DRUPAL_DEFAULT_SOLR_CORE;
 
 // Others are hardcoded.
 $config['key.key.islandora_rsa_key']['key_provider_settings']['file_location'] = '/opt/keys/jwt/private.key';
 
 // Some settings are derived from environment variables.
-$settings['hash_salt'] = file_get_contents($path . 'DRUPAL_DEFAULT_SALT');
+$settings['hash_salt'] = DRUPAL_DEFAULT_SALT;
 $settings['trusted_host_patterns'] = [
-  0 => file_get_contents($path . 'DRUPAL_DEFAULT_SITE_URL'),
+  0 => DRUPAL_DEFAULT_SITE_URL,
 ];
 
 // Database settings are also derived from environment variables.
 $databases['default']['default'] = [
-  'database' => file_get_contents($path . 'DRUPAL_DEFAULT_DB_NAME'),
-  'username' => file_get_contents($path . 'DRUPAL_DEFAULT_DB_USER'),
-  'password' => file_get_contents($path . 'DRUPAL_DEFAULT_DB_PASSWORD'),
-  'host' => file_get_contents($path . 'DB_MYSQL_HOST'),
-  'port' => file_get_contents($path . 'DB_MYSQL_PORT'),
+  'database' => DRUPAL_DEFAULT_DB_NAME,
+  'username' => DRUPAL_DEFAULT_DB_USER,
+  'password' => DRUPAL_DEFAULT_DB_PASSWORD,
+  'host' => DB_POSTGRES_HOST,
+  'port' => DB_POSTGRES_PORT,
   'prefix' => '',
   'driver' => 'mysql',
   'namespace' => 'Drupal\\Core\\Database\\Driver\\mysql',
 ];
 
+
 // Flysystem
 $settings['flysystem']['fedora']['driver'] = 'fedora';
-$settings['flysystem']['fedora']['config']['root'] = file_get_contents($path . 'DRUPAL_DEFAULT_FCREPO_URL');
+$settings['flysystem']['fedora']['config']['root'] = DRUPAL_DEFAULT_FCREPO_URL;
 
 // Change the php_storage settings in your setting.php. It is recommend that
 // this directory be outside out of the docroot.

@@ -1,10 +1,5 @@
 FROM php:8.3-fpm
 
-ENV DRUPAL_DATABASE_HOST postgres
-ENV DRUPAL_DATABASE_USER admin
-ENV DRUPAL_DATABASE_PASSWORD drupal
-ENV DRUPAL_DATABASE_NAME drupal
-
 RUN apt-get update && apt-get install -y \
     libfreetype6-dev \
     libjpeg62-turbo-dev \
@@ -24,4 +19,3 @@ COPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer
 COPY install-drupal.sh /usr/local/bin/install-drupal.sh
 RUN chmod +x /usr/local/bin/install-drupal.sh
 
-WORKDIR /var/www/html
